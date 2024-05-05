@@ -1,19 +1,18 @@
 package ru.job4j.concurrent;
 
 public class ThreadSleep {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Thread thread = new Thread(
                 () -> {
-                    try {
-                        System.out.println("Start loading ... ");
-                        Thread.sleep(3000);
-                        System.out.println("Loaded.");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    int count = 0;
+                    while (!Thread.currentThread().isInterrupted()) {
+                        System.out.println(count++);
                     }
                 }
         );
         thread.start();
-        System.out.println("Main");
+        Thread.sleep(1000);
+        thread.interrupt();
     }
+
 }
