@@ -10,14 +10,12 @@ public class ThreadStop {
                             Thread.sleep(10000);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
-
+                            System.out.println(Thread.currentThread().isInterrupted());
+                            System.out.println(Thread.currentThread().getState());
                         }
-                        System.out.println(Thread.currentThread().isInterrupted());
-                        System.out.println(Thread.currentThread().getState());
                     }
                 }
         );
-
         progress.start();
         Thread.sleep(1000);
         progress.interrupt();
