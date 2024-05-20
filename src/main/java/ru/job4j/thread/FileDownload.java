@@ -14,11 +14,23 @@ public class FileDownload implements Runnable {
     private final int speed;
 
     public static void main(String[] args) throws InterruptedException {
-        String url = args[0];
-        int speed = Integer.parseInt(args[1]);
-        Thread wget = new Thread(new FileDownload(url, speed));
-        wget.start();
-        wget.join();
+        if (validateArgs(args)) {
+            try {
+                String url = args[0];
+                int speed = Integer.parseInt(args[1]);
+                Thread wget = new Thread(new FileDownload(url, speed));
+                wget.start();
+                wget.join();
+            } catch (NumberFormatException e) {
+                System.out.println("args[1] is not a number.");
+            }
+        } else {
+            System.out.println("Not enough arguments provided");
+        }
+    }
+
+    private static boolean validateArgs(String[] args) {
+        return args.length > 1 && args[0] != null && args[1] != null;
     }
 
     @Override
