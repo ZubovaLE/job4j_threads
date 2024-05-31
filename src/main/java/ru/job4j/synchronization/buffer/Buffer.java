@@ -1,4 +1,4 @@
-package ru.job4j.buffer;
+package ru.job4j.synchronization.buffer;
 
 public class Buffer {
 

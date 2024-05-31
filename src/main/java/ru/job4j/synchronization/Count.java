@@ -1,4 +1,4 @@
-package ru.job4j.buffer;
+package ru.job4j.synchronization;
 
 public class Count {
     private int value;
