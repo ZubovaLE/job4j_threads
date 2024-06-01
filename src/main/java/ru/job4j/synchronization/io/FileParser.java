@@ -16,7 +16,7 @@ public class FileParser {
 
     public synchronized String getContent() throws IOException {
         StringBuilder output = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 output.append(line);
