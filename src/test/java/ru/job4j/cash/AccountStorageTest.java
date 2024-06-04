@@ -11,7 +11,7 @@ class AccountStorageTest {
         var storage = new AccountStorage();
         storage.add(new Account(1, 100));
         var firstAccount = storage.getById(1)
-                .orElseThrow(() -> new IllegalStateException("Not found account by id = 1"));
+                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
         assertThat(firstAccount.amount()).isEqualTo(100);
     }
 
@@ -21,7 +21,7 @@ class AccountStorageTest {
         storage.add(new Account(1, 100));
         storage.update(new Account(1, 200));
         var firstAccount = storage.getById(1)
-                .orElseThrow(() -> new IllegalStateException("Not found account by id = 1"));
+                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
         assertThat(firstAccount.amount()).isEqualTo(200);
     }
 
@@ -40,9 +40,9 @@ class AccountStorageTest {
         storage.add(new Account(2, 100));
         storage.transfer(1, 2, 100);
         var firstAccount = storage.getById(1)
-                .orElseThrow(() -> new IllegalStateException("Not found account by id = 1"));
+                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
         var secondAccount = storage.getById(2)
-                .orElseThrow(() -> new IllegalStateException("Not found account by id = 1"));
+                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
         assertThat(firstAccount.amount()).isEqualTo(0);
         assertThat(secondAccount.amount()).isEqualTo(200);
     }
