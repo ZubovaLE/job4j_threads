@@ -1,50 +1,87 @@
 package ru.job4j.cash;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 class AccountStorageTest {
 
+    private AccountStorage storage;
+
+    @BeforeEach
+    void setUp() {
+        storage = new AccountStorage();
+        storage.add(new Account(1, 100));
+    }
+
     @Test
     void whenAdd() {
-        var storage = new AccountStorage();
-        storage.add(new Account(1, 100));
-        var firstAccount = storage.getById(1)
-                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
-        assertThat(firstAccount.amount()).isEqualTo(100);
+        var result = storage.getById(1);
+
+        assertTrue(result.isPresent());
+        assertEquals(100, result.get().amount());
     }
 
     @Test
     void whenUpdate() {
-        var storage = new AccountStorage();
-        storage.add(new Account(1, 100));
-        storage.update(new Account(1, 200));
-        var firstAccount = storage.getById(1)
-                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
-        assertThat(firstAccount.amount()).isEqualTo(200);
+        assertTrue(storage.update(new Account(1, 200)));
+        assertTrue(storage.getById(1).isPresent());
+        assertEquals(200, storage.getById(1).get().amount());
+    }
+
+    @Test
+    void updateWhenInvalidIdThenReturnFalse() {
+        assertFalse(storage.update(new Account(5, 200)));
     }
 
     @Test
     void whenDelete() {
-        var storage = new AccountStorage();
-        storage.add(new Account(1, 100));
         storage.delete(1);
-        assertThat(storage.getById(1)).isEmpty();
+
+        assertTrue(storage.getById(1).isEmpty());
     }
 
     @Test
+    void deleteWhenInvalidId() {
+        Exception exception = assertThrows(IllegalStateException.class, () -> storage.delete(5));
+        assertEquals("Account with id 5 was not found", exception.getMessage());
+    }
+
+
+    @Test
     void whenTransfer() {
-        var storage = new AccountStorage();
-        storage.add(new Account(1, 100));
         storage.add(new Account(2, 100));
         storage.transfer(1, 2, 100);
-        var firstAccount = storage.getById(1)
-                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
-        var secondAccount = storage.getById(2)
-                .orElseThrow(() -> new IllegalStateException("Account with id 1 was not found"));
-        assertThat(firstAccount.amount()).isEqualTo(0);
-        assertThat(secondAccount.amount()).isEqualTo(200);
+        var firstAccount = storage.getById(1);
+        var secondAccount = storage.getById(2);
+
+        assertTrue(firstAccount.isPresent());
+        assertTrue(secondAccount.isPresent());
+        assertEquals(0, firstAccount.get().amount());
+        assertEquals(200, secondAccount.get().amount());
+    }
+
+    @Test
+    void transferWhenNotEnoughMoneyThenGetException() {
+        storage.add(new Account(2, 100));
+
+        storage.transfer(1, 2, 100);
+
+        Exception exception = assertThrows(IllegalStateException.class, () -> storage.transfer(1, 2, 1000));
+        assertEquals("Insufficient funds", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"1, 5", "5, 2"})
+    void transferWhenInvalidIdThenGetException(int fromId, int toId) {
+        storage.add(new Account(2, 100));
+
+        Exception exception = assertThrows(IllegalStateException.class, () -> storage.transfer(fromId, toId, 100));
+        assertEquals("Account with id 5 was not found", exception.getMessage());
     }
 
 }

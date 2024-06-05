@@ -15,7 +15,10 @@ public class AccountStorage {
 
     public synchronized boolean update(Account account) {
         synchronized (accounts) {
-            return accounts.put(account.id(), account) != null;
+            if (getById(account.id()).isPresent()) {
+                return accounts.put(account.id(), account) != null;
+            }
+            return false;
         }
     }
 
