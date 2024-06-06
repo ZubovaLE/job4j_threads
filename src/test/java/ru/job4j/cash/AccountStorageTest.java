@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 class AccountStorageTest {
 
     private AccountStorage storage;
@@ -19,7 +18,7 @@ class AccountStorageTest {
     }
 
     @Test
-    void whenAdd() {
+    void whenAddThenGetById() {
         var result = storage.getById(1);
 
         assertTrue(result.isPresent());
@@ -68,9 +67,7 @@ class AccountStorageTest {
     @Test
     void transferWhenNotEnoughMoneyThenGetException() {
         storage.add(new Account(2, 100));
-
-        storage.transfer(1, 2, 100);
-
+        
         Exception exception = assertThrows(IllegalStateException.class, () -> storage.transfer(1, 2, 1000));
         assertEquals("Insufficient funds", exception.getMessage());
     }
