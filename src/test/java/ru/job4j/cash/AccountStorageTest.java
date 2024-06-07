@@ -67,7 +67,7 @@ class AccountStorageTest {
     @Test
     void transferWhenNotEnoughMoneyThenGetException() {
         storage.add(new Account(2, 100));
-        
+
         Exception exception = assertThrows(IllegalStateException.class, () -> storage.transfer(1, 2, 1000));
         assertEquals("Insufficient funds", exception.getMessage());
     }

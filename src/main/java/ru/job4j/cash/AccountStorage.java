@@ -8,7 +8,7 @@ public class AccountStorage {
     private final ConcurrentHashMap<Integer, Account> accounts = new ConcurrentHashMap<>();
 
     public boolean add(Account account) {
-        return accounts.putIfAbsent(account.id(), new Account(account.id(), account.amount())) == null;
+        return accounts.putIfAbsent(account.id(), account) == null;
     }
 
     public boolean update(Account account) {
@@ -28,18 +28,22 @@ public class AccountStorage {
     }
 
     public boolean transfer(int fromId, int toId, int amount) {
-        if (getById(fromId).isPresent() && getById(toId).isPresent()) {
-            if (getById(fromId).get().amount() >= amount) {
-                Account toAccount = new Account(toId, getById(toId).get().amount() + amount);
-                update(toAccount);
-                Account fromAccount = new Account(fromId, getById(fromId).get().amount() - amount);
-                update(fromAccount);
-                return true;
-            } else {
-                throw new IllegalStateException("Insufficient funds");
+        Account fromAccount = getById(fromId).orElseThrow(() -> new IllegalStateException("Account with id " + fromId + " was not found"));
+        Account toAccount = getById(toId).orElseThrow(() -> new IllegalStateException("Account with id " + toId + " was not found"));
+
+        synchronized (fromId < toId ? fromAccount : toAccount) {
+            synchronized (fromId < toId ? toAccount : fromAccount) {
+                if (fromAccount.amount() >= amount) {
+                    Account newFromAccount = new Account(fromId, fromAccount.amount() - amount);
+                    Account newToAccount = new Account(toId, toAccount.amount() + amount);
+                    update(newFromAccount);
+                    update(newToAccount);
+                    return true;
+                } else {
+                    throw new IllegalStateException("Insufficient funds");
+                }
             }
         }
-        throw new IllegalStateException("Account with id " + (getById(fromId).isPresent() ? toId : fromId) + " was not found");
     }
 
 }
