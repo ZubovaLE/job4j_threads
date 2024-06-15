@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -15,7 +15,7 @@ class SimpleBlockingQueueTest {
 
     private final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(2);
     private final List<Integer> buffer = Collections.synchronizedList(new ArrayList<>());
-    private final CountDownLatch latch = new CountDownLatch(1);
+    private final AtomicInteger processedCount = new AtomicInteger(0);
 
     @Test
     public void testProducerConsumer() throws InterruptedException {
@@ -24,7 +24,6 @@ class SimpleBlockingQueueTest {
                 for (int i = 0; i < 10; i++) {
                     queue.offer(i);
                 }
-                latch.countDown();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -32,10 +31,11 @@ class SimpleBlockingQueueTest {
 
         Thread consumer = new Thread(() -> {
             try {
-                while (latch.getCount() > 0 || !queue.isEmpty()) {
+                while (processedCount.get() < 10) {
                     Integer value = queue.poll();
                     if (value != null) {
                         buffer.add(value);
+                        processedCount.incrementAndGet();
                     }
                 }
             } catch (InterruptedException e) {
