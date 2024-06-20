@@ -16,13 +16,18 @@ public class Cache {
             if (cacheModel.getVersion() != model.getVersion()) {
                 throw new OptimisticException("Versions are not equal");
             }
-            cacheModel.setName(model.getName());
-            return new Base(id, model.getVersion() + 1);
+            Base newBase = new Base(id, model.getVersion() + 1);
+            newBase.setName(model.getName());
+            return newBase;
         }) != null;
     }
 
     public void delete(Base model) {
         memory.remove(model.getId());
+    }
+
+    public Base get(int id) {
+        return memory.get(id);
     }
 
 }
