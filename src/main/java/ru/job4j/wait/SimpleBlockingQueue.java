@@ -17,17 +17,25 @@ public class SimpleBlockingQueue<T> {
         this.capacity = capacity;
     }
 
-    public synchronized void offer(T value) throws InterruptedException {
+    public synchronized void offer(T value) {
         while (queue.size() == capacity) {
-            wait();
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
         queue.offer(value);
         notifyAll();
     }
 
-    public synchronized T poll() throws InterruptedException {
+    public synchronized T poll() {
         while (queue.isEmpty()) {
-            wait();
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
         T value = queue.poll();
         notifyAll();

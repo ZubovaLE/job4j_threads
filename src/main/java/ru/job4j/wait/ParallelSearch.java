@@ -8,20 +8,12 @@ public class ParallelSearch {
     public static void main(String[] args) {
 
         final Thread consumer = new Thread(() -> {
-            while (true) {
-                try {
-                    Integer value = queue.poll();
-                    if (value != null) {
-                        System.out.println(value);
-                    }
-                    if (producerFinished) {
-                        break;
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
+            do {
+                Integer value = queue.poll();
+                if (value != null) {
+                    System.out.println(value);
                 }
-            }
+            } while (!producerFinished);
         });
         consumer.start();
 
