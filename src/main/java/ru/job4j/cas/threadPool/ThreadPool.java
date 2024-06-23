@@ -12,7 +12,11 @@ public class ThreadPool {
 
     public ThreadPool() {
         for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
-            threads.add(new Thread(tasks::poll));
+            Thread thread = new Thread(() -> {
+                tasks.poll().run();
+            });
+            threads.add(thread);
+            thread.start();
         }
     }
 
@@ -21,7 +25,9 @@ public class ThreadPool {
     }
 
     public void shutdown() {
-
+        for (Thread thread : threads) {
+            thread.interrupt();
+        }
     }
 
 }
