@@ -19,13 +19,24 @@ class SimpleBlockingQueueTest {
     @Test
     public void testProducerConsumer() throws InterruptedException {
         Thread producer = new Thread(
-                () -> IntStream.range(0, 5).forEach(queue::offer)
+                () -> IntStream.range(0, 5).forEach(i -> {
+                    try {
+                        queue.offer(i);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                })
         );
         producer.start();
         Thread consumer = new Thread(
                 () -> {
                     while (!queue.isEmpty() || !Thread.currentThread().isInterrupted()) {
-                        buffer.add(queue.poll());
+                        try {
+                            buffer.add(queue.poll());
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
                     }
                 }
         );

@@ -9,9 +9,11 @@ public class ParallelSearch {
 
         final Thread consumer = new Thread(() -> {
             do {
-                Integer value = queue.poll();
-                if (value != null) {
+                try {
+                    Integer value = queue.poll();
                     System.out.println(value);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             } while (!producerFinished);
         });
