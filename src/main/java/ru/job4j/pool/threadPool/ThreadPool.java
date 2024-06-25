@@ -1,4 +1,4 @@
-package ru.job4j.cas.threadPool;
+package ru.job4j.pool.threadPool;
 
 import net.jcip.annotations.ThreadSafe;
 import ru.job4j.wait.SimpleBlockingQueue;
