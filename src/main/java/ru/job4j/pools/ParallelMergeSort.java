@@ -1,19 +1,27 @@
 package ru.job4j.pools;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
-@RequiredArgsConstructor
 public class ParallelMergeSort extends RecursiveTask<int[]> {
 
     private final int[] array;
     private final int from;
     private final int to;
 
+    private ParallelMergeSort(int[] array, int from, int to) {
+        this.array = array;
+        this.from = from;
+        this.to = to;
+    }
+
+    public static int[] sort(int[] array) {
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
+        return forkJoinPool.invoke(new ParallelMergeSort(array, 0, array.length - 1));
+    }
+
     // Метод объединения двух отсортированных массивов
-    public static int[] merge(int[] left, int[] right) {
+    private static int[] merge(int[] left, int[] right) {
         int li = 0;
         int ri = 0;
         int resI = 0;
@@ -30,11 +38,6 @@ public class ParallelMergeSort extends RecursiveTask<int[]> {
             }
         }
         return result;
-    }
-
-    public static int[] sort(int[] array) {
-        ForkJoinPool forkJoinPool = new ForkJoinPool();
-        return forkJoinPool.invoke(new ParallelMergeSort(array, 0, array.length - 1));
     }
 
     @Override
