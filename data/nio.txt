@@ -1,0 +1,2 @@
+Тестовый файл для класса NioDemo
+Урок: NIO - Non-Blocking Input-Output (or new IO)
