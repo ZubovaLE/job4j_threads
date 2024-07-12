@@ -68,9 +68,11 @@
 
 „тобы создать поток, необходимо воспользоватьс€ классом java.lang.Thread
 
-Thread thread = new Thread (
-() -> System.out.println(Thread.currentThread().getName())
-);
+```java
+Thread thread=new Thread(
+        ()->System.out.println(Thread.currentThread().getName())
+        );
+```
 
  онструктор этого класса принимает функциональный интерфейс java.lang.Runnable, который имеет один метод run(). ћетоды,
 определенные в методе run(), будет выполн€тьс€ в многозадачной среде.
@@ -119,6 +121,19 @@ main
 
 ## 3  ак работают методы sleep, yield, wait, notify и notifyAll?
 
++ sleep - приостанавливает выполнение нити на указанное врем€ и переводит нить в состо€ние TIMED_WAITING;
++ yield - этот метод принудительно передает свой квант времени другим нит€м; ѕример:
+
+```java
+while(door.isClosed){ // пока дверь закрыта
+        Thread.yield();    // указать процессору перейти к другим потокам
+        }
+```
+
++ wait - переводит поток в режим ожидани€ WAITING;
++ notify - обратно переводит поток в режим выполнени€;
++ notifyAll - будит все нити, которые ждали изменени€ состо€ни€.
+
 [  оглавлению &#8593;](#ќглавление)
 
 ## 4 ќбъ€сните следующие термины: монитор, мьютекс, критическа€ секци€.
@@ -126,6 +141,34 @@ main
 [  оглавлению &#8593;](#ќглавление)
 
 ## 5  ак работает join()?
+
+ћетод join() позвол€ет вызывающему потоку ждать поток, у которого этот метод вызываетс€. Ќапример:
+
+```java
+public class ThreadStop {
+    public static void main(String[] args) throws InterruptedException {
+        Thread progress = new Thread(
+                () -> {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        try {
+                            System.out.println("start ...");
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            System.out.println(Thread.currentThread().isInterrupted());
+                            System.out.println(Thread.currentThread().getState());
+                        }
+                    }
+                }
+        );
+        progress.start();
+        Thread.sleep(1000);
+        progress.interrupt();
+        progress.join();
+    }
+}
+```
+
+¬ данном примере главный поток, который исполн€ет метод main, будет ждать окончани€ выполнени€ потока progress.
 
 [  оглавлению &#8593;](#ќглавление)
 
