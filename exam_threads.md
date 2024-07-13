@@ -122,6 +122,30 @@ main
 ## 3 Как работают методы sleep, yield, wait, notify и notifyAll?
 
 + sleep - приостанавливает выполнение нити на указанное время и переводит нить в состояние TIMED_WAITING;
+
+```java
+public class ThreadSleep {
+    public static void main(String[] args) {
+        Thread thread = new Thread(
+                () -> {
+                    try {
+                        System.out.println("Start loading ... ");
+                        Thread.sleep(3000);
+                        System.out.println("Loaded.");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
+        thread.start();
+        System.out.println("Main");
+    }
+}
+```
+
+Этот метод может выкинуть исключение InterruptedException. Это связано с тем, что нить могут попросить прервать свое
+выполнение, поэтому программисту необходимо предусмотреть дальнейшие действия, если такое случилось.
+
 + yield - этот метод принудительно передает свой квант времени другим нитям; Пример:
 
 ```java
@@ -131,12 +155,84 @@ while(door.isClosed){ // пока дверь закрыта
 ```
 
 + wait - переводит поток в режим ожидания WAITING;
-+ notify - обратно переводит поток в режим выполнения;
-+ notifyAll - будит все нити, которые ждали изменения состояния.
++ notify - обратно переводит поток в режим выполнения RUNNABLE;
++ notifyAll - будит все нити, которые ждали изменения состояния, т.е переводит их в состояние RUNNABLE.
+
+```java
+public class Barrier {
+    private boolean flag = false;
+
+    private final Object monitor = this;
+
+    public void on() {
+        synchronized (monitor) {
+            flag = true;
+            monitor.notifyAll();
+        }
+    }
+
+    public void off() {
+        synchronized (monitor) {
+            flag = false;
+            monitor.notifyAll();
+        }
+    }
+
+    public void check() {
+        synchronized (monitor) {
+            while (!flag) {
+                try {
+                    monitor.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+}
+```
+
+Метод on и off меняют флаг с true на false. После каждого изменения программа будит нити, которые ждут изменений.
+Переменная flag - это общий ресурс, поэтому мы с ней работаем только в критической секции. Синхронизация и методы
+nofityAll и wait вызываются у объекта класса Barrier.
+
+Следующая строчка кода сделана для наглядности монитора.
+
+```java 
+private final Object monitor = this;
+```
+
+Когда нить заходит в метод check, то она проверяет flag. Если флаг = false, то нить засыпает. Когда другая нить выполнит
+метод on или off, то у монитора выполняется метод notifyAll.
 
 [К оглавлению &#8593;](#Оглавление)
 
 ## 4 Объясните следующие термины: монитор, мьютекс, критическая секция.
+
+Виртуальная машина Java использует механизм мониторов для регулирования эксклюзивного доступа. В Java есть два механизма
+указать монитор: явный и неявный. Рассмотрим примеры неявных мониторов:
+
+- В случае нестатического метода монитором будет объект этого класса.
+- В случае со статическом методом монитором будет сам класс.
+
+```java
+public class ShowLock {
+    /* Монитор - это объект ShowLock */
+    public synchronized void lockOfInstance() {
+
+    }
+
+    /* Монитор будет сам класс ShowLock */
+    public static synchronized void lockOfClass() {
+
+    }
+}
+```
+
+Код внутри метода, обозначенного synchronized, называется **критической секцией**. Как только нить заходит в syncronized
+метод какого-либо класса, другая нить не сможет зайти ни в один из syncronized методов этого класса, пока первая нить не
+освободит метод, который она заняла. То есть **критическая секция** - это область памяти, с которой одновременно может
+работать только одна нить.
 
 [К оглавлению &#8593;](#Оглавление)
 
