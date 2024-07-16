@@ -437,13 +437,109 @@ ConcurrentHashMap представляет собой HashMap, хеш-массив которого поделен на сег
 
 ## 9 Различия между isInterrupted(), interrupted(), interrupt().
 
++ interrupt() - выставляет флаг прерывания, но никаких других действий НЕ делает
++ isInterrupted() - проверяет состояние флага прерывания и возвращает true/false соответственно, больше ничего НЕ делает
++ interrupted() - проверяет статус флага прерывания и СБРАСЫВАЕТ статус после проверки
+
+Пример:
+
+```java
+public class ThreadStop {
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(
+                () -> {
+                    int count = 0;
+                    while (!Thread.currentThread().isInterrupted()) {
+                        System.out.println(count++);
+                    }
+                }
+        );
+        thread.start();
+        Thread.sleep(1000);
+        thread.interrupt();
+    }
+}
+```
+
+Вывод на консоль каждый раз будет разным, так как планировщик сам определяет, какое время выделять для нити, поэтому
+флаг прерывания выставляется в произвольное время
+
+В данном коде главная нить запускает поток thread `thread.start();` и выставляет ему флаг
+прерывания `thread.interrupt();`  
+В нити thread идёт проверка этого флага: если он выставлен, то мы не заходим больше в тело цикла и выходим из метода
+run().
+
+Особое внимание нужно уделить ситуациям, когда нить находится в режиме ожидания, сна или заблокирована на длительное
+время другим схожим вызовом, т.е вызваны методы join(), sleep(), wait() соответственно. В таком случае попытка
+установить флаг прерывания `thread.interrupt();` вызовет InterruptedException. Поэтому вызов этих методов должен быть
+заключен в блок try-catch с выставлением флага прерывания внутри блока catch, чтобы прерывания действительно произошло:
+
+```java
+public class ThreadStop {
+    public static void main(String[] args) throws InterruptedException {
+        Thread progress = new Thread(
+                () -> {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        try {
+                            System.out.println("start ...");
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+        );
+        progress.start();
+        Thread.sleep(1000);
+        progress.interrupt();
+        progress.join();
+    }
+}
+```
+
+Итог:  
+если используются методы _**sleep(), join(), wait()**_ или аналогичные временно блокирующие поток методы, то нужно в
+блоке catch вызвать прерывание.
+
 [К оглавлению &#8593;](#Оглавление)
 
 ## 10 Что происходит при вызове Thread.interrupt()?
 
-Вызов этого метода устанавливает у потока статус, что он прерван. Сам метод возвращает true, если поток может быть
-прерван, в ином случае возвращается false. При этом сам вызов этого метода НЕ завершает поток, он только устанавливает
-статус: в частности, метод isInterrupted () класса Thread будет возвращать значение true.
+Вызов этого метода выставляет флаг прерывания у потока. Сам метод возвращает true, если поток может быть прерван, в ином
+случае возвращается false. При этом сам вызов этого метода НЕ завершает поток, он только устанавливает статус, а значит,
+метод `isInterrupted()` класса Thread будет возвращать значение true.
+
+Особое внимание нужно уделить ситуациям, когда нить находится в режиме ожидания, сна или заблокирована на длительное
+время другим схожим вызовом, т.е вызваны методы join(), sleep(), wait() соответственно. В таком случае попытка
+установить флаг прерывания `thread.interrupt();` вызовет InterruptedException. Поэтому вызов этих методов должен быть
+заключен в блок try-catch с выставлением флага прерывания внутри блока catch, чтобы прерывания действительно произошло:
+
+```java
+public class ThreadStop {
+    public static void main(String[] args) throws InterruptedException {
+        Thread progress = new Thread(
+                () -> {
+                    while (!Thread.currentThread().isInterrupted()) {
+                        try {
+                            System.out.println("start ...");
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+        );
+        progress.start();
+        Thread.sleep(1000);
+        progress.interrupt();
+        progress.join();
+    }
+}
+```
+
+Итог:  
+если используются методы _**sleep(), join(), wait()**_ или аналогичные временно блокирующие поток методы, то нужно в
+блоке catch вызвать прерывание.
 
 [К оглавлению &#8593;](#Оглавление)
 
