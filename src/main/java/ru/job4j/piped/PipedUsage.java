@@ -11,6 +11,7 @@ public class PipedUsage {
         final PipedInputStream in = new PipedInputStream();
         final PipedOutputStream out = new PipedOutputStream();
 
+        System.out.println("Изменения из main");
         Thread firstThread = new Thread(() -> {
             try {
                 out.write("Test".getBytes());
