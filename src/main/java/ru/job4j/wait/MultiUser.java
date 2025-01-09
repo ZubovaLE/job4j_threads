@@ -5,6 +5,7 @@ public class MultiUser {
     public static void main(String[] args) {
         Barrier barrier = new Barrier();
         System.out.println("change from main!");
+        System.out.println("change from main2!");
         Thread master = new Thread(
                 () -> {
                     System.out.println(Thread.currentThread().getName() + " started");
