@@ -6,6 +6,7 @@ public class ParallelSearch {
     private static volatile boolean producerFinished = false;
 
     public static void main(String[] args) {
+        System.out.println("aaa");
 
         final Thread consumer = new Thread(() -> {
             do {
