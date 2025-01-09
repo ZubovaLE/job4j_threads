@@ -10,6 +10,7 @@ public class PipedUsage {
 
         final PipedInputStream in = new PipedInputStream();
         final PipedOutputStream out = new PipedOutputStream();
+        System.out.println("say hello!!!");
 
         Thread firstThread = new Thread(() -> {
             try {
